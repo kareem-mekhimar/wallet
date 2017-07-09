@@ -1,0 +1,8 @@
+{
+    "name": "Wallet Api Documentation",
+    "version": "1.0.0",
+    "description": "http://grapes.mi-taxi.ca:8888/",
+    "template": {
+        "forceLanguage": "en"
+    }
+}
