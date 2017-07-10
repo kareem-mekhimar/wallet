@@ -11,14 +11,14 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use('/', function (req, res, next) {
+app.use('/wallet/', function (req, res, next) {
     var key = req.headers['access-key'];
     if (! key ||  key !== "1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8")
         return res.status(401).send({ error: "Not Authorized" });
     next();
 });
 
-app.use('/', function (req, res, next) {
+app.use('/wallet/', function (req, res, next) {
     var contype = req.headers['content-type'];
     if (contype && contype.indexOf('application/json') !== 0)
         return res.status(415).send({ error: "Unsupported Media Type (" + contype + ")" });
@@ -361,6 +361,6 @@ function getTransactions(proxyNumber, token) {
 }
 
 app.use('/wallet', router);
-app.use('/wallet/data', express.static('../public'))
+app.use('/doc', express.static('../public'))
 
 app.listen(8888);
