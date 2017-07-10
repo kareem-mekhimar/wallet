@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 app.use('/wallet/', function (req, res, next) {
     var key = req.headers['access-key'];
-    if (! key ||  key !== "1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8")
+    if (!key || key !== "1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8")
         return res.status(401).send({ error: "Not Authorized" });
     next();
 });
@@ -279,7 +279,59 @@ router.route("/transactions").get(function (req, res) {
         });
 
     }
-})
+});
+
+
+/**
+ * @api {get} /wallet/balance Get Current Balance In Wallet
+ * @apiHeader {String} access-key 1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8
+ * @apiGroup Wallet
+ * @apiVersion 1.0.0
+ * @apiParam {String} proxyNumber     Mandatory ProxyNumber AKA CardNumber. .
+ * @apiParamExample {json} Request-Example:
+ * /wallet/balance?proxyNumber=5388300003302
+ *  @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *  {
+ * 
+ *    "success": "Card balance has been retrieved successfully!",
+ *    "messageCode": "2002",
+ *    "proxyNumber": "5388300003302",
+ *    "balance": "69.00"
+ *
+ *  }
+ * 
+ *  @apiErrorExample {json} Error 
+ *     HTTP/1.1 200 OK
+ *      {
+ *        "error": "Error getting balance!",
+ *        "messageCode": "4003""
+ *      }
+ * 
+ */
+router.route("/balance").get(function (req, res) {
+    var proxyNumber = req.query.proxyNumber;
+
+    req.checkQuery('proxyNumber', 'Required').notEmpty();
+    req.checkQuery('proxyNumber', 'Not A Numeric String').matches(new RegExp('^\\d+$'));
+
+    res.contentType("application/json");
+
+    var errors = req.validationErrors();
+
+    if (errors) {
+        res.status(400).send(errors);
+        return;
+    } else {
+
+        login().then(function (token) {
+            getBalance(proxyNumber, token).then(function (result) {
+                res.status(200).send(result);
+            });
+        });
+
+    }
+});
 
 function login() {
     var options = {
@@ -345,6 +397,25 @@ function getTransactions(proxyNumber, token) {
     var options = {
         method: 'GET',
         uri: 'https://demo.zoompass.com/pm-api/getTransactions/?proxyNumber=' + proxyNumber,
+        headers: {
+            "authorization": "Bearer " + token
+        }
+    };
+
+    return rp(options)
+        .then(function (body) {
+            return body;
+        })
+        .catch(function (err) {
+
+            return err;
+        });
+}
+
+function getBalance(proxyNumber, token) {
+    var options = {
+        method: 'GET',
+        uri: 'https://demo.zoompass.com/pm-api/cardBalance/?proxyNumber=' + proxyNumber,
         headers: {
             "authorization": "Bearer " + token
         }

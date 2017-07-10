@@ -1,6 +1,67 @@
 define({ "api": [
   {
     "type": "get",
+    "url": "/wallet/balance",
+    "title": "Get Current Balance In Wallet",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "access-key",
+            "description": "<p>1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8</p>"
+          }
+        ]
+      }
+    },
+    "group": "Wallet",
+    "version": "1.0.0",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "proxyNumber",
+            "description": "<p>Mandatory ProxyNumber AKA CardNumber. .</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "/wallet/balance?proxyNumber=5388300003302",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success",
+          "content": "  HTTP/1.1 200 OK\n{\n\n  \"success\": \"Card balance has been retrieved successfully!\",\n  \"messageCode\": \"2002\",\n  \"proxyNumber\": \"5388300003302\",\n  \"balance\": \"69.00\"\n\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error ",
+          "content": "HTTP/1.1 200 OK\n {\n   \"error\": \"Error getting balance!\",\n   \"messageCode\": \"4003\"\"\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "app/server.js",
+    "groupTitle": "Wallet",
+    "name": "GetWalletBalance"
+  },
+  {
+    "type": "get",
     "url": "/wallet/transactions",
     "title": "View Transactions History On Wallet",
     "header": {

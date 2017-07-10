@@ -277,7 +277,7 @@ require([
     }
 
     // render pagetitle
-    var title = "Wallet Api";
+    var title = "Wallet Api" ;
     $(document).attr('title', title);
 
     // remove loader
