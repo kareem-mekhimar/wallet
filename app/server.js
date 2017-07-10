@@ -11,6 +11,12 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use('/', function (req, res, next) {
+    var key = req.headers['access-key'];
+    if (! key ||  key !== "1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8")
+        return res.status(401).send({ error: "Not Authorized" });
+    next();
+});
 
 app.use('/', function (req, res, next) {
     var contype = req.headers['content-type'];
@@ -32,6 +38,7 @@ var router = express.Router();
 
 /**
  * @api {put} /wallet Create New Wallet
+ *  @apiHeader {String} access-key 1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8
  * @apiGroup Wallet
  * @apiVersion 1.0.0
  * @apiParam {String} proxyNumber     Mandatory ProxyNumber AKA CardNumber.
@@ -97,6 +104,7 @@ router.route("/").put(function (req, res) {
 
 /**
  * @api {post} /wallet/load Transfer Money From Master Wallet To Card
+ *  @apiHeader {String} access-key 1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8
  * @apiGroup Wallet
  * @apiVersion 1.0.0
  * @apiParam {String} proxyNumber     Mandatory ProxyNumber AKA CardNumber.
@@ -138,6 +146,134 @@ router.route("/load").post(function (req, res) {
 
         login().then(function (token) {
             loadCard(body, token).then(function (result) {
+                res.status(200).send(result);
+            });
+        });
+
+    }
+});
+
+
+/**
+ * @api {get} /wallet/transactions View Transactions History On Wallet
+ * @apiHeader {String} access-key 1pZHAuZXhhbXBsZS5jb20iLCJzdWIiOiJtYWlsdG8
+ * @apiGroup Wallet
+ * @apiVersion 1.0.0
+ * @apiParam {String} proxyNumber     Mandatory ProxyNumber AKA CardNumber. .
+ * @apiParamExample {json} Request-Example:
+ * /wallet/transactions?proxyNumber=5388300003302
+ *  @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *  {
+ *   "success": "Card transaction history retrieved successfully!",
+ *   "messageCode": "2010",
+ *   "transactionList": [
+ *      {
+ *           "aauId": null,
+ *           "account": "4893827430665925",
+ *           "acqInstCode": null,
+ *          "acquirerId": null,
+ *           "addressVerif": null,
+ *           "amt": "2",
+ *           "apan": null,
+ *           "applyReq": null,
+ *           "approved": null,
+ *           "authAmount": null,
+ *           "authCode": "548327",
+ *           "buyerFirst": null,
+ *           "buyerLast": null,
+ *           "buyerLoaderId": "",
+ *           "buyerMiddle": null,
+ *           "caid": null,
+ *           "cardHolderAdj": null,
+ *           "cardHolderFee": null,
+ *           "cardPbmStatus": null,
+ *           "cardStatus": null,
+ *           "cardStatusDesc": null,
+ *           "class": "com.zoompass.cardprocessor.api.transaction.CardTransactionItem",
+ *           "clientRefnum": "",
+ *           "comment": "Loading 2 to the card with proxy #5388300003302",
+ *           "countryName": "",
+ *           "credit": "2",
+ *           "creditCardnum": null,
+ *           "customIndicator": "NDValue Load",
+ *           "ddaAccount": null,
+ *           "ddaInstitution": null,
+ *           "ddaRouting": null,
+ *           "debit": null,
+ *           "description": "Value Load",
+ *           "expDate": null,
+ *           "inserted": "07/09/2017  7:00:27 PM",
+ *          "issuingCurrcode": "CAD",
+ *           "localAmount": "2",
+ *           "localCurrCode": "",
+ *           "localTranCurrCode": null,
+ *           "logId": null,
+ *           "matchStatusDesc": null,
+ *           "matchTypeDesc": null,
+ *           "mcc": "",
+ *           "mccDescription": null,
+ *           "merchAddr": "",
+ *           "merchant": "A2A SOURCE ID",
+ *           "merchantNo": "",
+ *           "origAuthAmount": null,
+ *           "pan": null,
+ *           "payExpDate": null,
+ *           "posCond": null,
+ *           "posEntry": null,
+ *           "postdate": "07/09/2017",
+ *           "purseNo": null,
+ *           "pursecandoid": null,
+ *           "reasonCode": null,
+ *           "reasonDescription": "Undefined (catch all)",
+ *           "reasonId": null,
+ *           "reference": "CC00EB3AFCF5",
+ *           "requestCode": "1710",
+ *           "responseCode": "0",
+ *           "responseDescription": "Approval",
+ *           "reversed": "False",
+ *           "sCode": null,
+ *           "settleAmount": "2",
+ *           "settleSeq": null,
+ *           "sourceDesc": null,
+ *           "strategyName": "Paymobile Generic PrePaid Visa-Corporate",
+ *           "terminalId": null,
+ *           "tranResult": "Completed OK",
+ *           "trandate": "07/09/2017",
+ *           "txnLevel": "",
+ *           "txntype": "ValueLoad",
+ *           "userid": "A2A184373",
+ *           "utcInserted": "2017-07-09 23:00:27.300",
+ *           "utcPostDate": "2017-07-09 23:00:27.300",
+ *           "variance": null
+ *       },
+ *   ],
+ *   "transactionCount": 1
+ *  }
+ *     @apiErrorExample {json} Error 
+ *     HTTP/1.1 200 OK
+*     {
+*        "error": "Error retrieving transactions.",
+*        "messageCode": "4022"
+*      }
+ */
+router.route("/transactions").get(function (req, res) {
+    var proxyNumber = req.query.proxyNumber;
+
+    req.checkQuery('proxyNumber', 'Required').notEmpty();
+    req.checkQuery('proxyNumber', 'Not A Numeric String').matches(new RegExp('^\\d+$'));
+
+    res.contentType("application/json");
+
+    var errors = req.validationErrors();
+
+    if (errors) {
+        res.status(400).send(errors);
+        return;
+    } else {
+
+        login().then(function (token) {
+            getTransactions(proxyNumber, token).then(function (result) {
                 res.status(200).send(result);
             });
         });
@@ -205,7 +341,24 @@ function loadCard(body, token) {
         });
 }
 
+function getTransactions(proxyNumber, token) {
+    var options = {
+        method: 'GET',
+        uri: 'https://demo.zoompass.com/pm-api/getTransactions/?proxyNumber=' + proxyNumber,
+        headers: {
+            "authorization": "Bearer " + token
+        }
+    };
 
+    return rp(options)
+        .then(function (body) {
+            return body;
+        })
+        .catch(function (err) {
+
+            return err;
+        });
+}
 
 app.use('/wallet', router);
 app.use('/wallet/data', express.static('../public'))
