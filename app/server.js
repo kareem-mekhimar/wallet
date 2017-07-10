@@ -361,6 +361,6 @@ function getTransactions(proxyNumber, token) {
 }
 
 app.use('/wallet', router);
-app.use('/data', express.static('../public'))
+app.use('/walletdocs', express.static('../public'))
 
 app.listen(8888);
