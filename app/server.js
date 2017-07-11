@@ -88,7 +88,7 @@ router.route("/").put(function (req, res) {
     var errors = req.validationErrors();
 
     if (errors) {
-        res.status(400).send(errors);
+        res.status(400).send({ "error" : errors });
         return;
     } else {
 
@@ -140,7 +140,7 @@ router.route("/load").post(function (req, res) {
     var errors = req.validationErrors();
 
     if (errors) {
-        res.status(400).send(errors);
+        res.status(400).send({ "error" : errors });
         return;
     } else {
 
@@ -268,7 +268,7 @@ router.route("/transactions").get(function (req, res) {
     var errors = req.validationErrors();
 
     if (errors) {
-        res.status(400).send(errors);
+        res.status(400).send({ "error" : errors });
         return;
     } else {
 
@@ -320,7 +320,7 @@ router.route("/balance").get(function (req, res) {
     var errors = req.validationErrors();
 
     if (errors) {
-        res.status(400).send(errors);
+        res.status(400).send({ "error" : errors });
         return;
     } else {
 
